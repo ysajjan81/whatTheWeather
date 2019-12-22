@@ -21,8 +21,10 @@ import org.json.JSONObject;
 import java.io.BufferedReader;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.UnsupportedEncodingException;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.net.URLEncoder;
 import java.util.concurrent.ExecutionException;
 
 import javax.net.ssl.HttpsURLConnection;
@@ -33,6 +35,7 @@ public class MainActivity extends AppCompatActivity {
     TextView titleBox, resultBox;
     EditText inputBox;
     String city ;
+    private static final String URL = "https://samples.openweathermap.org/data/2.5/weather?q=London,uk&appid=b6907d289e10d714a6e88b30761fae22";
 
     public class DownloadTask extends AsyncTask<String, Void, String>{
 
@@ -55,6 +58,7 @@ public class MainActivity extends AppCompatActivity {
                 return res;
             }catch (Exception e) {
                 e.printStackTrace();
+                //Toast.makeText(this,"could not find weather", Toast.LENGTH_LONG);
                 return "failed";
             }
         }
@@ -66,12 +70,17 @@ public class MainActivity extends AppCompatActivity {
                 String weatherInfo  = jsonObject.getString("weather");
                 Log.i("Sajjan", weatherInfo);
                 JSONArray jsonArray = new JSONArray(weatherInfo);
+                String message = "";
                 for(int i = 0 ; i<jsonArray.length(); i++)
                 {
                     JSONObject jsonPart = jsonArray.getJSONObject(i);
-                    Log.i("Sajjan",jsonPart.getString("main"));
-                    Log.i("Sajjan",jsonPart.getString("description"));
+                    String main = jsonPart.getString("main");
+                    String desc = jsonPart.getString("description");
+                    if(main != "" && desc != "")
+                        message += main + ":" + desc;
                 }
+                if(message != "")
+                    resultBox.setText(message);
 
             } catch (JSONException e) {
                 e.printStackTrace();
@@ -84,12 +93,22 @@ public class MainActivity extends AppCompatActivity {
         inputMethodManager.hideSoftInputFromWindow(inputBox.getWindowToken(), 0);
 
         city = inputBox.getText().toString();
-        Toast.makeText(this, "city is " + city, Toast.LENGTH_LONG).show();
-        DownloadTask task = new DownloadTask();
-//        task.execute("https://samples.openweathermap.org/data/2.5/weather?q=" + city);
+        try {
+            String encodedCityName = URLEncoder.encode(city, "UTF-8");
+            DownloadTask task = new DownloadTask();
+            task.execute("https://samples.openweathermap.org/data/2.5/weather?q="+encodedCityName+",&APPID=3d27cbae4824f2b20b8b7f525b4a868b");
+        } catch (UnsupportedEncodingException e) {
+            e.printStackTrace();
+        }
+//        Toast.makeText(this, "city is " + city, Toast.LENGTH_LONG).show();
+
+//        String result = task.execute("https://samples.openweathermap.org/data/2.5/weather?q=Shanghai,uk&appid=AIzaSyADfZz_Pff7qR_LIeQdgmGNz5jqur1CjcM").get();
 //         task.execute("http://api.openweathermap.org/data/2.5/weather?q=" + city);
-        String result = task.execute("https://samples.openweathermap.org/data/2.5/weather?q=London,uk&appid=b6907d289e10d714a6e88b30761fae22").get();
-        Log.i("Sajjan", result);
+//        String result = task.execute("https://samples.openweathermap.org/data/2.5/weather?q=London,uk&appid=b6907d289e10d714a6e88b30761fae22").get();
+//        String result = task.execute("http://samples.openweathermap.org/data/2.5/weather?q="+city+",&APPID=3d27cbae4824f2b20b8b7f525b4a868b").get();
+//        resultBox.setText(result);
+//        String result = task.execute("http://api.openweathermap.org/data/2.5/weather?q=" + city + "&APPID=3d27cbae4824f2b20b8b7f525b4a868b").get();
+//        Log.i("Sajjan", result);
     }
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -99,10 +118,6 @@ public class MainActivity extends AppCompatActivity {
         titleBox = (TextView) findViewById(R.id.entercitytextview);
         resultBox = (TextView) findViewById(R.id.resultBox);
         inputBox = (EditText) findViewById(R.id.entertext);
-//        imageView.setImageResource("/drawable-v24/images1.jpeg");
-
-//        task.execute("https://samples.openweathermap.org/data/2.5/weather?q=London,uk&appid=b6907d289e10d714a6e88b30761fae22");
-//        task.execute("https://www.internetfags.net/superheroes.php");
 
     }
 

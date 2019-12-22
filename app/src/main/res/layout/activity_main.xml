@@ -44,6 +44,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:id="@+id/resultBox"
+            android:textColor="#FFFFFF"
             android:hint="tell you weather in a while ..."
             android:layout_marginTop="80dp"/>
     </LinearLayout>
